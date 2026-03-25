@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Diário de Obra">
+<meta name="theme-color" content="#cc1f1f">
+<title>Diário de Obra</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --surface2: #f0f0f0;
+    --surface3: #e8e8e8;
+    --border: #d0d0d0;
+    --red: #cc1f1f;
+    --red2: #a81717;
+    --text: #111111;
+    --text2: #444444;
+    --text3: #888888;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── HEADER ── */
+  .app-header {
+    background: var(--surface);
+    border-bottom: 3px solid var(--red);
+    padding: 14px 18px 12px;
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .logo-mark {
+    width: 42px; height: 42px;
+    background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 20px; color: #fff;
+    flex-shrink: 0; border-radius: 2px;
+  }
+  .title-group h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900; font-size: 24px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text); line-height: 1;
+  }
+  .title-group .sub {
+    font-size: 10px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--red); margin-top: 3px;
+  }
+  .header-date { margin-left: auto; text-align: right; }
+  .header-date .day {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px; font-weight: 900; color: var(--red); line-height: 1;
+  }
+  .header-date .monyear {
+    font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text3);
+  }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 680px; margin: 0 auto; padding: 0 14px; }
+  .section { margin-top: 18px; }
+  .sec-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--red);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .sec-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ── WEATHER ── */
+  .weather-bar { display: flex; gap: 6px; }
+  .w-btn {
+    flex: 1; padding: 9px 4px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; color: var(--text3);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 600; letter-spacing: 1px;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 4px;
+  }
+  .w-btn:hover { border-color: var(--red); color: var(--text); }
+  .w-btn.active { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* ── FORM ── */
+  .field-label {
+    display: block; font-size: 10px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 5px; font-weight: 600;
+  }
+  input, select, textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 4px; color: var(--text); font-family: 'Barlow', sans-serif;
+    font-size: 15px; padding: 11px 12px; outline: none;
+    transition: border-color 0.15s; -webkit-appearance: none; appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--red); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+    padding-right: 32px; cursor: pointer;
+  }
+  select option { background: var(--surface); }
+  textarea { resize: vertical; min-height: 80px; }
+  .form-grid { display: grid; gap: 10px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr 72px; gap: 10px; }
+
+  /* ── COMPANIES ── */
+  .company-add { display: flex; gap: 8px; }
+  .company-add input { flex: 1; }
+  .company-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .c-tag {
+    background: var(--surface3); border: 1px solid var(--border);
+    border-radius: 3px; padding: 5px 10px;
+    font-size: 12px; color: var(--text2);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .c-tag button {
+    background: none; border: none; color: var(--text3);
+    cursor: pointer; font-size: 16px; line-height: 1;
+    padding: 0; width: auto;
+    transition: color 0.15s;
+  }
+  .c-tag button:hover { color: var(--red); }
+  .empty-tags { font-size: 12px; color: #bbb; margin-top: 6px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 11px 16px; border: none; border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red2); }
+  .btn-gray { background: var(--surface3); color: var(--text); border: 1px solid var(--border); }
+  .btn-gray:hover { border-color: var(--red); color: var(--red); }
+  .btn-sm { padding: 9px 14px; font-size: 13px; }
+  .btn-full { width: 100%; }
+  .btn-remove {
+    padding: 7px 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; cursor: pointer; color: var(--text3);
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .btn-remove:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── ENTRIES ── */
+  .floor-group {
+    margin-bottom: 10px; border: 1px solid var(--border);
+    border-radius: 4px; overflow: hidden;
+  }
+  .floor-hdr {
+    background: var(--surface3); padding: 8px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .floor-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--red);
+  }
+  .floor-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 700; color: var(--text2);
+  }
+  .entry-row {
+    display: flex; align-items: center; padding: 10px 14px;
+    border-top: 1px solid var(--border); gap: 10;
+    background: var(--surface); transition: background 0.1s;
+  }
+  .entry-row:hover { background: #fafafa; }
+  .e-company {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    flex: 1; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+    margin-right: 8px;
+  }
+  .e-role { font-size: 11px; color: var(--text3); flex-shrink: 0; margin-right: 8px; }
+  .e-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 900; color: var(--red);
+    min-width: 28px; text-align: right; flex-shrink: 0; margin-right: 8px;
+  }
+
+  /* ── TOTAL ── */
+  .total-badge {
+    background: var(--surface); border: 2px solid var(--red);
+    border-radius: 4px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 16; margin-top: 4px;
+  }
+  .total-lbl {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--text3); font-weight: 700;
+  }
+  .total-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 56px; font-weight: 900; color: var(--red); line-height: 1;
+  }
+  .total-breakdown { margin-left: auto; font-size: 12px; color: var(--text3); text-align: right; }
+  .total-breakdown div { margin-bottom: 2px; }
+
+  /* ── EXPORT ── */
+  .export-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .exp-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 8px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 4px;
+    cursor: pointer; transition: all 0.15s;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text2);
+  }
+  .exp-btn:hover { border-color: var(--red); color: var(--red); }
+  .exp-btn span { font-size: 22px; }
+
+  /* ── EMPTY ── */
+  .empty-state {
+    text-align: center; padding: 30px 20px; color: #bbb;
+    font-size: 13px; letter-spacing: 1px;
+    border: 1px dashed var(--border); border-radius: 4px;
+    background: var(--surface);
+  }
+  .empty-state .icon { font-size: 28px; margin-bottom: 8px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #111; border: 1px solid var(--red); color: #fff;
+    padding: 12px 22px; border-radius: 4px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; transition: transform 0.3s ease;
+    z-index: 999; box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    white-space: nowrap; pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ── MODAL ── */
+  .overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 200; display: flex; align-items: flex-end; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.2s;
+  }
+  .overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface); border-radius: 10px 10px 0 0;
+    border: 1px solid var(--border); border-bottom: none;
+    padding: 22px 18px 32px; width: 100%; max-width: 680px;
+    transform: translateY(100%); transition: transform 0.3s ease;
+    max-height: 82vh; overflow-y: auto;
+  }
+  .overlay.open .modal { transform: translateY(0); }
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px; font-weight: 900; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text);
+    margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-close {
+    background: none; border: none; color: var(--text3);
+    cursor: pointer; font-size: 20px; line-height: 1;
+    width: auto; padding: 4px;
+  }
+  .preview-box {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 14px;
+    font-family: monospace; font-size: 13px; color: var(--text2);
+    white-space: pre-wrap; line-height: 1.7;
+    max-height: 48vh; overflow-y: auto; margin-bottom: 14px;
+  }
+  .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    background: #fff8f0; border: 1px solid #f5c080;
+    border-radius: 4px; padding: 12px 14px;
+    font-size: 13px; color: #7a4f00;
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 16px;
+  }
+  .install-banner .icon { font-size: 20px; flex-shrink: 0; }
+  .install-banner button {
+    margin-left: auto; flex-shrink: 0;
+    background: #f5a623; border: none; border-radius: 3px;
+    padding: 6px 12px; font-family: 'Barlow Condensed', sans-serif;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #fff; cursor: pointer; width: auto;
+  }
+
+  @media (max-width: 420px) {
+    .form-row { grid-template-columns: 1fr 1fr; }
+    .form-row .qty-col { grid-column: 1 / -1; }
+    .weather-bar { flex-wrap: wrap; }
+    .w-btn { flex: 1 0 calc(50% - 4px); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="logo-mark">DO</div>
+  <div class="title-group">
+    <h1>Diário de Obra</h1>
+    <div class="sub">Controle de Efetivo</div>
+  </div>
+  <div class="header-date">
+    <div class="day" id="hDay">--</div>
+    <div class="monyear" id="hMonYear">--- ----</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- INSTALAR -->
+  <div class="install-banner" id="installBanner" style="display:none">
+    <span class="icon">📲</span>
+    <span>Adicione à tela inicial para usar como app!</span>
+    <button id="installBtn">Instalar</button>
+  </div>
+
+  <!-- CLIMA -->
+  <div class="section">
+    <div class="sec-label">Condições do dia</div>
+    <div class="weather-bar" id="weatherBar">
+      <button class="w-btn active" data-w="Sol" onclick="setWeather(this)">☀️ Sol</button>
+      <button class="w-btn" data-w="Nublado" onclick="setWeather(this)">⛅ Nublado</button>
+      <button class="w-btn" data-w="Chuva" onclick="setWeather(this)">🌧️ Chuva</button>
+      <button class="w-btn" data-w="Temporal" onclick="setWeather(this)">⛈️ Temporal</button>
+    </div>
+  </div>
+
+  <!-- EMPREITEIRAS -->
+  <div class="section">
+    <div class="sec-label">Empreiteiras</div>
+    <div class="company-add">
+      <input type="text" id="newCompany" placeholder="Nome da empresa ou empreiteira..." onkeydown="if(event.key==='Enter')addCompany()">
+      <button class="btn btn-red btn-sm" onclick="addCompany()">+ Incluir</button>
+    </div>
+    <div class="company-tags" id="companyTags">
+      <span class="empty-tags">Nenhuma empresa cadastrada ainda.</span>
+    </div>
+  </div>
+
+  <!-- LANÇAR EFETIVO -->
+  <div class="section">
+    <div class="sec-label">Lançar efetivo</div>
+    <div class="form-grid">
+      <div>
+        <label class="field-label">Empresa / Empreiteira</label>
+        <select id="selCompany">
+          <option value="">— selecione —</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div>
+          <label class="field-label">Função</label>
+          <select id="selRole">
+            <option>Pedreiro</option>
+            <option>Servente</option>
+            <option>Carpinteiro</option>
+            <option>Armador</option>
+            <option>Eletricista</option>
+            <option>Auxiliar de elétrica</option>
+            <option>Instalador</option>
+            <option>Furador</option>
+            <option>Encanador</option>
+            <option>Auxiliar hidráulico</option>
+            <option>Drywall</option>
+            <option>Impermeabilização</option>
+            <option>Gesseiro / Forro</option>
+            <option>Ceramista</option>
+            <option>Pintor</option>
+            <option>Soldador</option>
+            <option>Mestre de obras</option>
+            <option>Engenheiro</option>
+            <option>Segurança do trabalho</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Pavimento</label>
+          <select id="selFloor"></select>
+        </div>
+        <div class="qty-col">
+          <label class="field-label">Qtd.</label>
+          <input type="number" id="qty" min="1" placeholder="0" onkeydown="if(event.key==='Enter')addEntry()">
+        </div>
+      </div>
+      <button class="btn btn-red btn-full" onclick="addEntry()">▸ Adicionar ao efetivo</button>
+    </div>
+  </div>
+
+  <!-- EFETIVO DO DIA -->
+  <div class="section">
+    <div class="sec-label">Efetivo do dia</div>
+    <div id="entriesList">
+      <div class="empty-state"><div class="icon">📋</div>Nenhum lançamento ainda.<br>Adicione o efetivo acima.</div>
+    </div>
+    <div class="total-badge" style="margin-top:10px">
+      <div>
+        <div class="total-lbl">Total geral</div>
+        <div class="total-num" id="totalNum">0</div>
+      </div>
+      <div class="total-breakdown" id="totalBreak"></div>
+    </div>
+  </div>
+
+  <!-- OBSERVAÇÕES -->
+  <div class="section">
+    <div class="sec-label">Observações</div>
+    <textarea id="notes" placeholder="Registre ocorrências, atrasos, visitas, decisões técnicas..."></textarea>
+  </div>
+
+  <!-- EXPORTAR -->
+  <div class="section">
+    <div class="sec-label">Exportar / Compartilhar</div>
+    <div class="export-grid">
+      <button class="exp-btn" onclick="copyText()"><span>📋</span>Copiar</button>
+      <button class="exp-btn" onclick="sendWhatsApp()"><span>💬</span>WhatsApp</button>
+      <button class="exp-btn" onclick="openModal()"><span>👁️</span>Visualizar</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">
+      Relatório — <span id="modalDate"></span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="preview-box" id="previewBox"></div>
+    <div class="modal-actions">
+      <button class="btn btn-gray" onclick="copyText();closeModal()">Copiar texto</button>
+      <button class="btn btn-red" onclick="sendWhatsApp()">WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+const PAVIMENTOS = [
+  'Térreo','Mezanino',
+  ...Array.from({length:28},(_,i)=>`${i+1}º Pavimento`),
+  'Cobertura','Área Externa','Subsolo 1','Subsolo 2'
+];
+
+let companies = [];
+let entries   = [];
+let weather   = 'Sol';
+
+const todayKey = () => new Date().toISOString().slice(0,10);
+const COMP_KEY = 'dob_companies_v2';
+const entKey   = () => `dob_entries_v2_${todayKey()}`;
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+function init() {
+  // date header
+  const d = new Date();
+  const DAYS   = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  document.getElementById('hDay').textContent = String(d.getDate()).padStart(2,'0');
+  document.getElementById('hMonYear').textContent = `${MONTHS[d.getMonth()]} ${d.getFullYear()} · ${DAYS[d.getDay()]}`;
+  document.getElementById('modalDate').textContent = d.toLocaleDateString('pt-BR');
+
+  // floor select
+  const fs = document.getElementById('selFloor');
+  PAVIMENTOS.forEach(p => { const o=document.createElement('option'); o.text=p; fs.appendChild(o); });
+  fs.value = '1º Pavimento';
+
+  // load from storage
+  try {
+    const sc = localStorage.getItem(COMP_KEY);
+    if(sc) companies = JSON.parse(sc);
+    const se = localStorage.getItem(entKey());
+    if(se) entries = JSON.parse(se);
+  } catch(e){}
+
+  renderCompanies();
+  renderEntries();
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────
+function saveCompanies() { localStorage.setItem(COMP_KEY, JSON.stringify(companies)); }
+function saveEntries()   { localStorage.setItem(entKey(), JSON.stringify(entries)); }
+
+// ── WEATHER ──────────────────────────────────────────────────────────────
+function setWeather(btn) {
+  document.querySelectorAll('.w-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  weather = btn.dataset.w;
+}
+
+// ── COMPANIES ────────────────────────────────────────────────────────────
+function addCompany() {
+  const val = document.getElementById('newCompany').value.trim();
+  if(!val || companies.includes(val)) { showToast('Empresa já cadastrada ou campo vazio'); return; }
+  companies.push(val);
+  saveCompanies();
+  document.getElementById('newCompany').value = '';
+  renderCompanies();
+  showToast('Empresa salva ✓');
+}
+
+function removeCompany(i) {
+  companies.splice(i,1);
+  saveCompanies();
+  renderCompanies();
+}
+
+function renderCompanies() {
+  const el = document.getElementById('companyTags');
+  const sel = document.getElementById('selCompany');
+  const cur = sel.value;
+
+  if(companies.length === 0) {
+    el.innerHTML = '<span class="empty-tags">Nenhuma empresa cadastrada ainda.</span>';
+  } else {
+    el.innerHTML = companies.map((c,i) => `
+      <div class="c-tag">${c}
+        <button onclick="removeCompany(${i})" title="Remover">×</button>
+      </div>`).join('');
+  }
+
+  sel.innerHTML = '<option value="">— selecione —</option>' +
+    companies.map(c=>`<option>${c}</option>`).join('');
+  if(cur) sel.value = cur;
+}
+
+// ── ENTRIES ───────────────────────────────────────────────────────────────
+function addEntry() {
+  const company = document.getElementById('selCompany').value;
+  const role    = document.getElementById('selRole').value;
+  const floor   = document.getElementById('selFloor').value;
+  const n       = parseInt(document.getElementById('qty').value);
+
+  if(!company) { showToast('Selecione uma empresa'); return; }
+  if(!n || n < 1) { showToast('Informe a quantidade'); return; }
+
+  const idx = entries.findIndex(e => e.company===company && e.role===role && e.floor===floor);
+  if(idx >= 0) {
+    entries[idx].workers += n;
+    showToast(`Atualizado: +${n}`);
+  } else {
+    entries.push({company,role,floor,workers:n});
+    showToast('Lançamento adicionado ✓');
+  }
+
+  document.getElementById('qty').value = '';
+  saveEntries();
+  renderEntries();
+}
+
+function removeEntry(i) {
+  entries.splice(i,1);
+  saveEntries();
+  renderEntries();
+}
+
+function renderEntries() {
+  const el = document.getElementById('entriesList');
+  if(entries.length === 0) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📋</div>Nenhum lançamento ainda.<br>Adicione o efetivo acima.</div>';
+    document.getElementById('totalNum').textContent = '0';
+    document.getElementById('totalBreak').innerHTML = '';
+    return;
+  }
+
+  // group by floor in PAVIMENTOS order
+  const grp = {};
+  PAVIMENTOS.forEach(p => { if(entries.find(e=>e.floor===p)) grp[p]=[]; });
+  entries.forEach(e => { if(!grp[e.floor]) grp[e.floor]=[]; grp[e.floor].push(e); });
+
+  el.innerHTML = Object.entries(grp).map(([floor,list]) => {
+    const sub = list.reduce((s,e)=>s+e.workers,0);
+    const rows = list.map((e) => {
+      const gi = entries.indexOf(e);
+      return `<div class="entry-row">
+        <span class="e-company">${e.company}</span>
+        <span class="e-role">${e.role}</span>
+        <span class="e-count">${e.workers}</span>
+        <button class="btn-remove" onclick="removeEntry(${gi})">✕</button>
+      </div>`;
+    }).join('');
+    return `<div class="floor-group">
+      <div class="floor-hdr">
+        <span class="floor-name">📍 ${floor}</span>
+        <span class="floor-sub">${sub} trabalhador${sub!==1?'es':''}</span>
+      </div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  const total = entries.reduce((s,e)=>s+e.workers,0);
+  document.getElementById('totalNum').textContent = total;
+
+  const byRole = {};
+  entries.forEach(e => { byRole[e.role] = (byRole[e.role]||0)+e.workers; });
+  document.getElementById('totalBreak').innerHTML = Object.entries(byRole)
+    .sort((a,b)=>b[1]-a[1]).slice(0,4)
+    .map(([r,n])=>`<div>${n} ${r}</div>`).join('');
+}
+
+// ── GENERATE TEXT ─────────────────────────────────────────────────────────
+function generateText() {
+  const date = new Date().toLocaleDateString('pt-BR');
+  const grp = {};
+  PAVIMENTOS.forEach(p => { if(entries.find(e=>e.floor===p)) grp[p]=[]; });
+  entries.forEach(e => { if(!grp[e.floor]) grp[e.floor]=[]; grp[e.floor].push(e); });
+
+  const lines = [
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+    `📋 EFETIVO DE OBRA`,
+    `📅 ${date}`,
+    `🌤️ Clima: ${weather}`,
+    `━━━━━━━━━━━━━━━━━━━━━━━━━━`,
+  ];
+
+  Object.entries(grp).forEach(([floor,list]) => {
+    lines.push(`\n📍 ${floor.toUpperCase()}`);
+    list.forEach(e => lines.push(`   ${e.company} · ${e.role}: *${e.workers}*`));
+    lines.push(`   ↳ Subtotal: ${list.reduce((s,e)=>s+e.workers,0)}`);
+  });
+
+  const total = entries.reduce((s,e)=>s+e.workers,0);
+  lines.push(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`👷 TOTAL GERAL: *${total} trabalhadores*`);
+  lines.push(`━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+  const notes = document.getElementById('notes').value.trim();
+  if(notes) lines.push(`\n📝 Observações:\n${notes}`);
+
+  return lines.join('\n');
+}
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────
+async function copyText() {
+  try {
+    await navigator.clipboard.writeText(generateText());
+    showToast('Copiado!');
+  } catch(_) {
+    const ta = document.createElement('textarea');
+    ta.value = generateText(); ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); showToast('Copiado!');
+  }
+}
+
+function sendWhatsApp() {
+  if(!entries.length) { showToast('Adicione lançamentos primeiro'); return; }
+  const enc = encodeURIComponent(generateText());
+  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if(mobile) window.location.href = 'https://wa.me/?text=' + enc;
+  else window.open('https://web.whatsapp.com/send?text=' + enc, '_blank');
+}
+
+function openModal() {
+  document.getElementById('previewBox').textContent = generateText();
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+// ── TOAST ─────────────────────────────────────────────────────────────────
+let _tt;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_tt); _tt = setTimeout(()=>el.classList.remove('show'), 2400);
+}
+
+// ── PWA INSTALL ───────────────────────────────────────────────────────────
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if(outcome === 'accepted') document.getElementById('installBanner').style.display = 'none';
+  deferredPrompt = null;
+});
+
+init();
+</script>
+</body>
+</html>
