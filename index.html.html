@@ -272,6 +272,19 @@ textarea { resize: vertical; min-height: 80px; }
 .exp-btn:hover { border-color: var(--red); color: var(--red); }
 .exp-btn span { font-size: 22px; }
 
+
+/* ── DASHBOARD / CONFIGURAÇÕES ── */
+.dash-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; box-shadow: var(--shadow); }
+.dash-card.full { grid-column: 1 / -1; }
+.dash-num { font-family: 'Barlow Condensed', sans-serif; font-size: 42px; font-weight: 900; color: var(--red); line-height: 1; }
+.dash-lbl { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 4px; }
+.dash-list { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.config-card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 14px; margin-bottom: 12px; }
+.config-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.date-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+@media(max-width:520px){ .dash-grid { grid-template-columns: 1fr 1fr; } .config-actions { grid-template-columns: 1fr; } .date-tools { grid-template-columns: 1fr; } .nav-btn { font-size: 9px; letter-spacing: .5px; } }
+
 /* ── EMPTY ── */
 .empty-state {
   text-align: center; padding: 30px 20px; color: #bbb;
@@ -731,10 +744,10 @@ textarea { resize: vertical; min-height: 80px; }
 
 <!-- HEADER -->
 <header class="app-header">
-  <div class="logo-mark" id="logoMark">DO</div>
+  <div class="logo-mark" id="logoMark">DB</div>
   <div class="title-group">
-    <h1 id="headerTitle">Diário de Obra</h1>
-    <div class="sub" id="headerSub">Controle de Efetivo</div>
+    <h1 id="headerTitle">Dashboard</h1>
+    <div class="sub" id="headerSub">Resumo da Obra</div>
   </div>
   <div class="header-date">
     <div class="day" id="hDay">--</div>
@@ -742,14 +755,52 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 </header>
 
-<!-- PAGE: DIÁRIO DE OBRA -->
-<div class="page active" id="page-diario">
-<div class="container">
 
+<!-- PAGE: DASHBOARD -->
+<div class="page active" id="page-dashboard">
+<div class="container">
   <div class="install-banner" id="installBanner" style="display:none">
     <span class="icon">📲</span>
     <span>Adicione à tela inicial para usar como app!</span>
     <button id="installBtn">Instalar</button>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Resumo da obra</div>
+    <div class="dash-grid">
+      <div class="dash-card"><div class="dash-num" id="db-total-workers">0</div><div class="dash-lbl">Trabalhadores hoje</div></div>
+      <div class="dash-card"><div class="dash-num" id="db-ri-pend">0</div><div class="dash-lbl">RIs pendentes</div></div>
+      <div class="dash-card"><div class="dash-num" id="db-ri-total">0</div><div class="dash-lbl">Total de RIs</div></div>
+      <div class="dash-card"><div class="dash-num" id="db-ri-corr">0</div><div class="dash-lbl">RIs em correção</div></div>
+      <div class="dash-card full">
+        <div class="sec-label" style="margin-bottom:8px">Últimas ocorrências</div>
+        <div class="dash-list" id="db-last-ri">Nenhuma ocorrência registrada.</div>
+      </div>
+      <div class="dash-card full">
+        <div class="sec-label" style="margin-bottom:8px">Ações rápidas</div>
+        <div class="config-actions">
+          <button class="btn btn-red" onclick="setPage('diario')">Lançar efetivo</button>
+          <button class="btn btn-gray" onclick="setPage('config')">Configurações / Backup</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div><!-- /page-dashboard -->
+
+<!-- PAGE: DIÁRIO DE OBRA -->
+<div class="page" id="page-diario">
+<div class="container">
+
+  <div class="section">
+    <div class="sec-label">Data do diário</div>
+    <div class="date-tools">
+      <div>
+        <label class="field-label">Selecionar data</label>
+        <input type="date" id="diarioDate" onchange="changeDiarioDate(this.value)">
+      </div>
+      <button class="btn btn-gray" onclick="copyPreviousDay()">Copiar último dia</button>
+    </div>
   </div>
 
   <div class="section">
@@ -774,6 +825,17 @@ textarea { resize: vertical; min-height: 80px; }
   </div>
 
   <div class="section">
+    <div class="sec-label">Funções</div>
+    <div class="company-add">
+      <input type="text" id="newRole" placeholder="Nome da função... Ex: Azulejista, Almoxarifeiro" onkeydown="if(event.key==='Enter')addRole()">
+      <button class="btn btn-red btn-sm" onclick="addRole()">+ Incluir</button>
+    </div>
+    <div class="company-tags" id="roleTags">
+      <span class="empty-tags">Nenhuma função personalizada ainda.</span>
+    </div>
+  </div>
+
+  <div class="section">
     <div class="sec-label">Lançar efetivo</div>
     <div class="form-grid">
       <div>
@@ -783,16 +845,7 @@ textarea { resize: vertical; min-height: 80px; }
       <div class="form-row">
         <div>
           <label class="field-label">Função</label>
-          <select id="selRole">
-            <option>Pedreiro</option><option>Servente</option><option>Carpinteiro</option>
-            <option>Armador</option><option>Eletricista</option><option>Auxiliar de elétrica</option>
-            <option>Instalador</option><option>Furador</option><option>Encanador</option>
-            <option>Auxiliar hidráulico</option><option>Drywall</option>
-            <option>Impermeabilização</option><option>Gesseiro / Forro</option>
-            <option>Ceramista</option><option>Pintor</option><option>Soldador</option>
-            <option>Mestre de obras</option><option>Engenheiro</option>
-            <option>Segurança do trabalho</option>
-          </select>
+          <select id="selRole"></select>
         </div>
         <div>
           <label class="field-label">Pavimento</label>
@@ -838,112 +891,6 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 </div><!-- /page-diario -->
 
-<!-- PAGE: AGENDA DE QUALIDADE -->
-<div class="page" id="page-agenda">
-<div class="container">
-
-  <div class="section">
-    <div class="sec-label">Resumo</div>
-    <div class="aq-stats">
-      <div class="aq-stat"><div class="aq-stat-num lib" id="cnt-lib">0</div><div class="aq-stat-lbl">Liberações</div></div>
-      <div class="aq-stat"><div class="aq-stat-num fin" id="cnt-fin">0</div><div class="aq-stat-lbl">Finalizações</div></div>
-      <div class="aq-stat"><div class="aq-stat-num conf" id="cnt-conf">0</div><div class="aq-stat-lbl">Conferências</div></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">Visualizar</div>
-    <div class="aq-view-tabs">
-      <button class="aq-tab active" onclick="aqSetView('lista')">Todos</button>
-      <button class="aq-tab" onclick="aqSetView('hoje')">Hoje</button>
-      <button class="aq-tab" onclick="aqSetView('semana')">Semana</button>
-    </div>
-    <div class="aq-legend">
-      <div class="aq-leg"><div class="aq-leg-bar lb-ok"></div>Prazo OK (+3d)</div>
-      <div class="aq-leg"><div class="aq-leg-bar lb-urg"></div>Urgente (1–3d)</div>
-      <div class="aq-leg"><div class="aq-leg-bar lb-atr"></div>Atrasado</div>
-    </div>
-    <div class="sec-label">Filtros</div>
-    <div class="aq-filters" id="aq-filters"></div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">Disciplinas</div>
-    <div class="company-add">
-      <input type="text" id="aq-new-disc-inp" placeholder="Nome da disciplina..." onkeydown="if(event.key==='Enter')aqAddDisc()">
-      <button class="btn btn-red btn-sm" onclick="aqAddDisc()">+ Incluir</button>
-    </div>
-    <div class="company-tags" id="aq-disc-tags">
-      <span class="empty-tags">Nenhuma disciplina personalizada ainda.</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">Nova atividade</div>
-    <button class="aq-add-toggle" onclick="aqToggleAdd()">
-      <span>+ Incluir atividade</span><span id="aq-add-arr">▼</span>
-    </button>
-    <div class="aq-add-body" id="aq-add-body">
-      <div style="margin-bottom:10px">
-        <label class="field-label">Descrição</label>
-        <input id="aq-title" type="text" placeholder="Serviço / unidade..."/>
-      </div>
-      <div class="form-row2" style="margin-bottom:10px">
-        <div>
-          <label class="field-label">Tipo</label>
-          <select id="aq-tipo">
-            <option value="liberacao">Liberação</option>
-            <option value="finalizacao">Finalização</option>
-            <option value="conferencia">Conferência</option>
-          </select>
-        </div>
-        <div>
-          <label class="field-label">Disciplina</label>
-          <select id="aq-disc" onchange="aqLoadPreset()"></select>
-        </div>
-      </div>
-      <div class="form-row2" style="margin-bottom:10px">
-        <div>
-          <label class="field-label">Pavimento</label>
-          <select id="aq-floor"></select>
-        </div>
-        <div>
-          <label class="field-label">Apartamento / Unidade</label>
-          <input id="aq-apto" type="text" placeholder="Ex: 802, Bloco A..."/>
-        </div>
-      </div>
-      <div class="form-row2" style="margin-bottom:10px">
-        <div>
-          <label class="field-label">Data início</label>
-          <input id="aq-date" type="date"/>
-        </div>
-        <div>
-          <label class="field-label">Prazo de liberação</label>
-          <input id="aq-deadline" type="date" onchange="aqUpdateHint()"/>
-        </div>
-      </div>
-      <div style="margin-bottom:10px">
-        <label class="field-label">Empreiteiro responsável</label>
-        <input id="aq-resp" type="text" placeholder="Nome do empreiteiro..."/>
-      </div>
-      <div class="dl-hint-txt" id="aq-dl-hint"></div>
-      <div style="margin-bottom:10px">
-        <label class="field-label">Critérios de liberação</label>
-        <div class="preset-wrap" id="aq-preset-wrap"></div>
-        <div id="aq-new-crit"></div>
-        <button class="crit-add-btn" onclick="aqAddCritInput()">+ Adicionar critério</button>
-      </div>
-      <button class="btn btn-red btn-full" onclick="aqAddItem()">Salvar atividade</button>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="sec-label">Atividades</div>
-    <div id="aq-list"></div>
-  </div>
-
-</div>
-</div><!-- /page-agenda -->
 
 <!-- PAGE: RELATÓRIOS DE INCOERÊNCIAS -->
 <div class="page" id="page-ri">
@@ -1115,6 +1062,51 @@ textarea { resize: vertical; min-height: 80px; }
 </div>
 </div><!-- /page-ri -->
 
+
+<!-- PAGE: CONFIGURAÇÕES -->
+<div class="page" id="page-config">
+<div class="container">
+  <div class="section">
+    <div class="sec-label">Dados da obra</div>
+    <div class="config-card">
+      <div class="form-grid">
+        <div><label class="field-label">Nome da obra</label><input id="cfg-obra" placeholder="Ex: Residencial Rocontec"></div>
+        <div><label class="field-label">Empresa / Construtora</label><input id="cfg-empresa" placeholder="Ex: ROCONTEC"></div>
+        <div class="form-row2">
+          <div><label class="field-label">Sigla / logo textual</label><input id="cfg-logo" maxlength="4" placeholder="DO"></div>
+          <div><label class="field-label">Cor principal</label><input id="cfg-cor" type="color" value="#cc1f1f"></div>
+        </div>
+        <button class="btn btn-red btn-full" onclick="saveAppSettings()">Salvar configurações</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Pavimentos</div>
+    <div class="config-card">
+      <label class="field-label">Lista de pavimentos, um por linha</label>
+      <textarea id="cfg-pavimentos" style="min-height:160px"></textarea>
+      <div class="config-actions" style="margin-top:10px">
+        <button class="btn btn-red" onclick="saveFloorsFromConfig()">Salvar pavimentos</button>
+        <button class="btn btn-gray" onclick="resetFloorsDefault()">Restaurar padrão</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sec-label">Backup e segurança</div>
+    <div class="config-card">
+      <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px">Os dados deste app ficam salvos no navegador do iPhone. Exporte backups periodicamente para não perder informações ao trocar de aparelho, limpar o Safari ou reinstalar o app.</p>
+      <div class="config-actions">
+        <button class="btn btn-red" onclick="exportBackup()">Exportar backup</button>
+        <button class="btn btn-gray" onclick="document.getElementById('backupFile').click()">Importar backup</button>
+      </div>
+      <input id="backupFile" type="file" accept="application/json,.json" style="display:none" onchange="importBackup(this)">
+    </div>
+  </div>
+</div>
+</div><!-- /page-config -->
+
 <!-- MODAL: Detalhe -->
 <div class="overlay" id="ri-overlay" onclick="if(event.target===this)riCloseDetail()">
   <div class="modal" id="ri-detail-modal" style="max-height:88vh">
@@ -1163,14 +1155,17 @@ textarea { resize: vertical; min-height: 80px; }
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-diario" onclick="setPage('diario')">
-    <span class="nav-icon">📋</span>Efetivo
+  <button class="nav-btn active" id="nav-dashboard" onclick="setPage('dashboard')">
+    <span class="nav-icon">🏠</span>Início
   </button>
-  <button class="nav-btn" id="nav-agenda" onclick="setPage('agenda')">
-    <span class="nav-icon">✅</span>Qualidade
+  <button class="nav-btn" id="nav-diario" onclick="setPage('diario')">
+    <span class="nav-icon">📋</span>Efetivo
   </button>
   <button class="nav-btn" id="nav-ri" onclick="setPage('ri')">
     <span class="nav-icon">⚠️</span>RIs
+  </button>
+  <button class="nav-btn" id="nav-config" onclick="setPage('config')">
+    <span class="nav-icon">⚙️</span>Ajustes
   </button>
 </nav>
 
@@ -1178,11 +1173,31 @@ textarea { resize: vertical; min-height: 80px; }
 /* ════════════════════════════════════════
    SHARED
 ════════════════════════════════════════ */
-const PAVIMENTOS = [
+const DEFAULT_PAVIMENTOS = [
   'Térreo','Mezanino',
   ...Array.from({length:28},(_,i)=>`${i+1}º Pavimento`),
   'Cobertura','Área Externa','Subsolo 1','Subsolo 2'
 ];
+
+const FLOORS_KEY = 'dob_pavimentos_v1';
+function loadPavimentos() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FLOORS_KEY) || '[]');
+    return Array.isArray(saved) && saved.length ? saved : [...DEFAULT_PAVIMENTOS];
+  } catch(e) { return [...DEFAULT_PAVIMENTOS]; }
+}
+let PAVIMENTOS = loadPavimentos();
+function refreshFloorSelects() {
+  ['selFloor','aq-floor','ri-inp-floor'].forEach(id => {
+    const el = document.getElementById(id); if(!el) return;
+    const cur = el.value;
+    el.innerHTML = '';
+    PAVIMENTOS.forEach(p => { const o=document.createElement('option'); o.text=p; o.value=p; el.appendChild(o); });
+    if(cur && PAVIMENTOS.includes(cur)) el.value = cur;
+    else if(PAVIMENTOS.length) el.value = PAVIMENTOS[0];
+  });
+}
+
 
 let _toastTimer;
 function showToast(msg) {
@@ -1191,8 +1206,91 @@ function showToast(msg) {
   clearTimeout(_toastTimer); _toastTimer = setTimeout(()=>el.classList.remove('show'), 2400);
 }
 
+const SETTINGS_KEY = 'dob_app_settings_v1';
+let appSettings = {};
+function loadAppSettings() {
+  try { appSettings = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') || {}; } catch(e) { appSettings = {}; }
+  applyAppSettings();
+}
+function applyAppSettings() {
+  const root = document.documentElement;
+  if(appSettings.cor) { root.style.setProperty('--red', appSettings.cor); root.style.setProperty('--theme-color', appSettings.cor); }
+  const obra = appSettings.obra || 'Diário de Obra';
+  const empresa = appSettings.empresa || 'ROCONTEC';
+  const riObra = document.getElementById('ri-obra-nome'); if(riObra && !riObra.dataset.userEdited) riObra.value = empresa;
+}
+function fillConfigFields() {
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.value = val || ''; };
+  set('cfg-obra', appSettings.obra || 'Diário de Obra');
+  set('cfg-empresa', appSettings.empresa || 'ROCONTEC');
+  set('cfg-logo', appSettings.logo || 'DO');
+  set('cfg-cor', appSettings.cor || '#cc1f1f');
+  const pav = document.getElementById('cfg-pavimentos'); if(pav) pav.value = PAVIMENTOS.join('\n');
+}
+function saveAppSettings() {
+  appSettings = {
+    obra: (document.getElementById('cfg-obra').value || '').trim() || 'Diário de Obra',
+    empresa: (document.getElementById('cfg-empresa').value || '').trim() || 'ROCONTEC',
+    logo: (document.getElementById('cfg-logo').value || '').trim() || 'DO',
+    cor: document.getElementById('cfg-cor').value || '#cc1f1f'
+  };
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
+  applyAppSettings(); updateDashboard(); showToast('Configurações salvas ✓');
+}
+function saveFloorsFromConfig() {
+  const lines = (document.getElementById('cfg-pavimentos').value || '').split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!lines.length) { showToast('Inclua pelo menos um pavimento'); return; }
+  PAVIMENTOS = [...new Set(lines)];
+  localStorage.setItem(FLOORS_KEY, JSON.stringify(PAVIMENTOS));
+  refreshFloorSelects(); renderEntries(); riRender(); updateDashboard(); showToast('Pavimentos atualizados ✓');
+}
+function resetFloorsDefault() {
+  PAVIMENTOS = [...DEFAULT_PAVIMENTOS]; localStorage.setItem(FLOORS_KEY, JSON.stringify(PAVIMENTOS));
+  fillConfigFields(); refreshFloorSelects(); renderEntries(); riRender(); updateDashboard(); showToast('Pavimentos restaurados');
+}
+function exportBackup() {
+  const data = {};
+  for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k) data[k]=localStorage.getItem(k); }
+  const payload = { app:'Diario de Obra Integrado', version:'3.0', exportedAt:new Date().toISOString(), localStorage:data };
+  const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `backup-diario-obra-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(a.href);
+  showToast('Backup exportado ✓');
+}
+function importBackup(inp) {
+  const file = inp.files && inp.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      const data = payload.localStorage || payload;
+      Object.entries(data).forEach(([k,v]) => localStorage.setItem(k, String(v)));
+      showToast('Backup importado. Recarregando...');
+      setTimeout(()=>location.reload(), 900);
+    } catch(err) { showToast('Arquivo de backup inválido'); }
+  };
+  reader.readAsText(file);
+}
+function updateDashboard() {
+  const today = new Date().toISOString().slice(0,10);
+  let todayEntries = [];
+  try { todayEntries = JSON.parse(localStorage.getItem(`dob_entries_v2_${today}`) || '[]'); } catch(e){}
+  const totalWorkers = todayEntries.reduce((s,e)=>s+(+e.workers||0),0);
+  const setTxt=(id,val)=>{const el=document.getElementById(id); if(el) el.textContent=val;};
+  const ris = riItems || [];
+  setTxt('db-total-workers', totalWorkers);
+  setTxt('db-ri-pend', ris.filter(x=>x.status==='pendente').length);
+  setTxt('db-ri-total', ris.length);
+  setTxt('db-ri-corr', ris.filter(x=>x.status==='correcao').length);
+  const last = [...ris].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,3);
+  const list = document.getElementById('db-last-ri');
+  if(list) list.innerHTML = last.length ? last.map(x=>`<div>• <strong>${x.title}</strong> — ${riStatusLabel(x.status)}${x.floor?' · '+x.floor:''}</div>`).join('') : 'Nenhuma ocorrência registrada.';
+}
+
 /* Page switching */
-let currentPage = 'diario';
+let currentPage = 'dashboard';
 function setPage(page) {
   currentPage = page;
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1200,26 +1298,30 @@ function setPage(page) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('nav-' + page).classList.add('active');
   const headers = {
-    diario: ['DO','Diário de Obra','Controle de Efetivo'],
-    agenda: ['AQ','Agenda de Qualidade','Controle de Liberações'],
-    ri:     ['RI','Rel. de Incoerências','ROCONTEC'],
+    dashboard: ['DB','Dashboard','Resumo da Obra'],
+    diario: [appSettings.logo || 'DO', appSettings.obra || 'Diário de Obra','Controle de Efetivo'],
+    ri:     ['RI','Rel. de Incoerências', appSettings.empresa || 'ROCONTEC'],
+    config: ['⚙','Configurações','Obra, listas e backup'],
   };
   const h = headers[page] || headers.diario;
   document.getElementById('logoMark').textContent = h[0];
   document.getElementById('headerTitle').textContent = h[1];
   document.getElementById('headerSub').textContent = h[2];
   if (page === 'ri') riRender();
+  if (page === 'config') fillConfigFields();
+  updateDashboard();
 }
 
 /* Date header */
-(function() {
-  const d = new Date();
-  const DAYS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-  const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const DAYS = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+function updateHeaderDate(d = new Date()) {
   document.getElementById('hDay').textContent = String(d.getDate()).padStart(2,'0');
   document.getElementById('hMonYear').textContent = `${MONTHS[d.getMonth()]} ${d.getFullYear()} · ${DAYS[d.getDay()]}`;
-  document.getElementById('modalDate').textContent = d.toLocaleDateString('pt-BR');
-})();
+  const md = document.getElementById('modalDate'); if(md) md.textContent = d.toLocaleDateString('pt-BR');
+}
+updateHeaderDate(new Date());
+loadAppSettings();
 
 /* ════════════════════════════════════════
    DIÁRIO DE OBRA
@@ -1227,24 +1329,48 @@ function setPage(page) {
 let companies = [];
 let entries = [];
 let weather = 'Sol';
+let customRoles = [];
 
-const todayKey = () => new Date().toISOString().slice(0,10);
+const DEFAULT_ROLES = [
+  'Pedreiro','Servente','Carpinteiro','Armador','Eletricista','Auxiliar de elétrica',
+  'Instalador','Furador','Encanador','Auxiliar hidráulico','Drywall','Impermeabilização',
+  'Gesseiro / Forro','Ceramista','Pintor','Soldador','Mestre de obras','Engenheiro',
+  'Segurança do trabalho'
+];
+
+let selectedDiarioDate = new Date().toISOString().slice(0,10);
+const todayKey = () => selectedDiarioDate;
 const COMP_KEY = 'dob_companies_v2';
+const ROLE_KEY = 'dob_roles_custom_v1';
 const entKey = () => `dob_entries_v2_${todayKey()}`;
+function loadEntriesForSelectedDate(){
+  try { entries = JSON.parse(localStorage.getItem(entKey()) || '[]'); } catch(e) { entries = []; }
+}
+function changeDiarioDate(val){ if(!val) return; saveEntries(); selectedDiarioDate = val; loadEntriesForSelectedDate(); renderEntries(); updateHeaderDate(new Date(val+'T12:00:00')); updateDashboard(); }
+function copyPreviousDay(){
+  let d = new Date(selectedDiarioDate+'T12:00:00');
+  for(let i=1;i<=30;i++){
+    const prev = new Date(d); prev.setDate(d.getDate()-i);
+    const key = `dob_entries_v2_${prev.toISOString().slice(0,10)}`;
+    const saved = localStorage.getItem(key);
+    if(saved && saved !== '[]'){ entries = JSON.parse(saved); saveEntries(); renderEntries(); updateDashboard(); showToast('Efetivo copiado do último dia ✓'); return; }
+  }
+  showToast('Nenhum dia anterior encontrado');
+}
 
 (function initDiario() {
-  const fs = document.getElementById('selFloor');
-  PAVIMENTOS.forEach(p => { const o=document.createElement('option'); o.text=p; fs.appendChild(o); });
-  fs.value = '1º Pavimento';
+  const dd = document.getElementById('diarioDate'); if(dd) dd.value = selectedDiarioDate;
+  refreshFloorSelects();
   try {
     const sc = localStorage.getItem(COMP_KEY); if(sc) companies = JSON.parse(sc);
-    const se = localStorage.getItem(entKey()); if(se) entries = JSON.parse(se);
+    const sr = localStorage.getItem(ROLE_KEY); if(sr) customRoles = JSON.parse(sr);
+    loadEntriesForSelectedDate();
   } catch(e){}
-  renderCompanies(); renderEntries();
+  renderCompanies(); renderRoles(); renderEntries(); updateDashboard();
 })();
 
 function saveCompanies() { localStorage.setItem(COMP_KEY, JSON.stringify(companies)); }
-function saveEntries() { localStorage.setItem(entKey(), JSON.stringify(entries)); }
+function saveEntries() { localStorage.setItem(entKey(), JSON.stringify(entries)); updateDashboard(); }
 
 function setWeather(btn) {
   document.querySelectorAll('.w-btn').forEach(b => b.classList.remove('active'));
@@ -1270,6 +1396,36 @@ function renderCompanies() {
     : companies.map((c,i) => `<div class="c-tag">${c}<button onclick="removeCompany(${i})" title="Remover">×</button></div>`).join('');
   sel.innerHTML = '<option value="">— selecione —</option>' + companies.map(c=>`<option>${c}</option>`).join('');
   if(cur) sel.value = cur;
+}
+
+function allRoles() {
+  const lowerDefaults = DEFAULT_ROLES.map(r => r.toLowerCase());
+  return [...DEFAULT_ROLES, ...customRoles.filter(r => !lowerDefaults.includes(r.toLowerCase()))];
+}
+function saveRoles() { localStorage.setItem(ROLE_KEY, JSON.stringify(customRoles)); }
+function addRole() {
+  const inp = document.getElementById('newRole');
+  const val = inp.value.trim();
+  if(!val) { showToast('Informe o nome da função'); return; }
+  if(allRoles().map(r=>r.toLowerCase()).includes(val.toLowerCase())) { showToast('Função já cadastrada'); return; }
+  customRoles.push(val); saveRoles(); inp.value = '';
+  renderRoles(); showToast('Função salva ✓');
+}
+function removeRole(i) {
+  const role = customRoles[i];
+  const inUse = entries.some(e => e.role === role);
+  if(inUse) { showToast('Função em uso no efetivo'); return; }
+  customRoles.splice(i,1); saveRoles(); renderRoles();
+}
+function renderRoles() {
+  const tagEl = document.getElementById('roleTags');
+  const sel = document.getElementById('selRole');
+  const cur = sel.value;
+  tagEl.innerHTML = customRoles.length === 0
+    ? '<span class="empty-tags">Nenhuma função personalizada ainda.</span>'
+    : customRoles.map((r,i) => `<div class="c-tag">${r}<button onclick="removeRole(${i})" title="Remover">×</button></div>`).join('');
+  sel.innerHTML = allRoles().map(r=>`<option>${r}</option>`).join('');
+  if(cur && allRoles().includes(cur)) sel.value = cur;
 }
 
 function addEntry() {
@@ -1324,7 +1480,7 @@ function renderEntries() {
 }
 
 function generateText() {
-  const date = new Date().toLocaleDateString('pt-BR');
+  const date = new Date(selectedDiarioDate+'T12:00:00').toLocaleDateString('pt-BR');
   const grp = {};
   PAVIMENTOS.forEach(p => { if(entries.find(e=>e.floor===p)) grp[p]=[]; });
   entries.forEach(e => { if(!grp[e.floor]) grp[e.floor]=[]; grp[e.floor].push(e); });
@@ -1380,280 +1536,6 @@ document.getElementById('installBtn').addEventListener('click', async () => {
 });
 
 /* ════════════════════════════════════════
-   AGENDA DE QUALIDADE
-════════════════════════════════════════ */
-const aqNow = new Date(); aqNow.setHours(0,0,0,0);
-const aqToday = aqNow.toISOString().split('T')[0];
-document.getElementById('aq-date').value = aqToday;
-document.getElementById('aq-deadline').value = aqToday;
-
-// Preenche select de pavimento da agenda com os mesmos pavimentos do diário
-(function(){
-  const fs = document.getElementById('aq-floor');
-  PAVIMENTOS.forEach(p => { const o=document.createElement('option'); o.text=p; fs.appendChild(o); });
-  fs.value = '1º Pavimento';
-})();
-
-// ── Disciplinas ──
-const AQ_DISC_FIXAS = ['Cerâmica','Gesso','Drywall','Hidráulica','Elétrica','Impermeabilização','Outro'];
-const AQ_DISC_KEY = 'aq_disciplinas_custom';
-let aqDiscs = [];
-try { aqDiscs = JSON.parse(localStorage.getItem(AQ_DISC_KEY) || '[]'); } catch(e){}
-
-function aqSaveDiscs() { localStorage.setItem(AQ_DISC_KEY, JSON.stringify(aqDiscs)); }
-
-function aqAllDiscs() { return [...AQ_DISC_FIXAS, ...aqDiscs.filter(d => !AQ_DISC_FIXAS.includes(d))]; }
-
-function aqAddDisc() {
-  const val = document.getElementById('aq-new-disc-inp').value.trim();
-  if (!val) return;
-  if (aqAllDiscs().map(d=>d.toLowerCase()).includes(val.toLowerCase())) { showToast('Disciplina já existe'); return; }
-  aqDiscs.push(val);
-  aqSaveDiscs();
-  document.getElementById('aq-new-disc-inp').value = '';
-  aqRenderDiscTags();
-  aqPopulateDiscSelect();
-  showToast('Disciplina salva ✓');
-}
-
-function aqRemoveDisc(i) {
-  aqDiscs.splice(i, 1);
-  aqSaveDiscs();
-  aqRenderDiscTags();
-  aqPopulateDiscSelect();
-}
-
-function aqRenderDiscTags() {
-  const el = document.getElementById('aq-disc-tags');
-  if (!aqDiscs.length) {
-    el.innerHTML = '<span class="empty-tags">Nenhuma disciplina personalizada ainda.</span>';
-    return;
-  }
-  el.innerHTML = aqDiscs.map((d,i) =>
-    `<div class="c-tag">${d}<button onclick="aqRemoveDisc(${i})" title="Remover">×</button></div>`
-  ).join('');
-}
-
-function aqPopulateDiscSelect() {
-  const sel = document.getElementById('aq-disc');
-  const cur = sel.value;
-  sel.innerHTML = aqAllDiscs().map(d => `<option value="${d}">${d}</option>`).join('');
-  if (cur && aqAllDiscs().includes(cur)) sel.value = cur;
-  else sel.value = aqAllDiscs()[0];
-}
-
-aqRenderDiscTags();
-aqPopulateDiscSelect();
-
-const AQ_PRESETS = {
-  'Cerâmica':['Teste de impermeabilização concluído','Caimento do contrapiso conferido','Nível dos ralos verificado','Empoçamento checado','Base limpa e seca'],
-  'Gesso':['Prumo conferido','Esquadro verificado','Planeza/alinhamento visual OK','Pontos críticos inspecionados'],
-  'Drywall':['Prumo conferido','Esquadro verificado','Alinhamento dos painéis OK','Encontros e reforços verificados'],
-  'Hidráulica':['Posição dos pontos de água confirmada','Posição dos pontos de esgoto confirmada','Regularização dos ralos verificada','Cotas e níveis conferidos'],
-  'Elétrica':['Posicionamento das caixinhas conferido','Profundidade e alinhamento OK','Enfiação verificada','Interferências checadas'],
-  'Impermeabilização':['Base preparada e limpa','Condições de lançamento verificadas','Arremates e pontos críticos inspecionados'],
-  'Outro':[]
-};
-
-let aqItems = [];
-let aqNewCrit = [];
-let aqFilter = 'all';
-let aqView = 'lista';
-
-try { aqItems = JSON.parse(localStorage.getItem('aq_obra_integrated') || '[]'); } catch(e){}
-
-if (!aqItems.length) {
-  const d2 = new Date(aqNow); d2.setDate(d2.getDate()+2);
-  const d6 = new Date(aqNow); d6.setDate(d6.getDate()+6);
-  const yst = new Date(aqNow); yst.setDate(yst.getDate()-1);
-  aqItems = [
-    {id:1,title:'Liberar cerâmica pav. 12',tipo:'liberacao',disc:'Cerâmica',date:aqToday,deadline:aqToday,resp:'Empreiteiro A',done:false,expanded:false,criteria:[
-      {id:101,text:'Teste de impermeabilização concluído',done:true},
-      {id:102,text:'Caimento do contrapiso conferido',done:false},
-      {id:103,text:'Nível dos ralos verificado',done:false},
-    ]},
-    {id:2,title:'Liberar impermeabilização bloco B',tipo:'liberacao',disc:'Impermeabilização',date:aqToday,deadline:d2.toISOString().split('T')[0],resp:'Empreiteiro B',done:false,expanded:false,criteria:[
-      {id:201,text:'Base preparada e limpa',done:false},
-      {id:202,text:'Condições de lançamento verificadas',done:false},
-    ]},
-    {id:3,title:'Conferir prumo gesso apto 802',tipo:'conferencia',disc:'Gesso',date:aqToday,deadline:d6.toISOString().split('T')[0],resp:'Empreiteiro C',done:false,expanded:false,criteria:[
-      {id:301,text:'Prumo conferido',done:false},
-      {id:302,text:'Esquadro verificado',done:false},
-    ]},
-    {id:4,title:'Reinspecionar hidráulica bloco A',tipo:'finalizacao',disc:'Hidráulica',date:aqToday,deadline:yst.toISOString().split('T')[0],resp:'Empreiteiro D',done:false,expanded:false,criteria:[
-      {id:401,text:'Posição dos pontos de água confirmada',done:false},
-    ]},
-  ];
-  aqSave();
-}
-
-function aqSave() { try { localStorage.setItem('aq_obra_integrated', JSON.stringify(aqItems)); } catch(e){} }
-
-function aqDiff(dl) { if(!dl) return null; const d=new Date(dl);d.setHours(0,0,0,0);return Math.round((d-aqNow)/86400000); }
-function aqUrgency(dl, done) {
-  if(done) return 'done';
-  const d=aqDiff(dl);if(d===null)return'ok';
-  if(d<0)return'atrasado';if(d===0)return'hoje';if(d<=3)return'urgente';return'ok';
-}
-function aqUrgOrd(u){return{atrasado:0,hoje:0,urgente:1,ok:2,done:3}[u]??2;}
-function aqDlBadge(dl,done){
-  if(done||!dl)return null;const d=aqDiff(dl);
-  if(d<0)return{txt:`Atrasado ${Math.abs(d)}d`,cls:'dl-atr'};
-  if(d===0)return{txt:'Vence hoje',cls:'dl-hj'};
-  if(d<=3)return{txt:`${d}d restante${d>1?'s':''}`,cls:'dl-urg'};
-  return{txt:`${d} dias`,cls:'dl-ok'};
-}
-function aqUpdateHint(){
-  const d=document.getElementById('aq-deadline').value,h=document.getElementById('aq-dl-hint');
-  if(!d){h.textContent='';return;}
-  const df=aqDiff(d);
-  if(df<0)h.textContent=`⚠ Prazo já passou há ${Math.abs(df)} dia(s)`;
-  else if(df===0)h.textContent='⚠ Prazo é hoje';
-  else if(df<=3)h.textContent=`⚡ Prazo urgente — ${df} dia(s) restante(s)`;
-  else h.textContent=`Prazo em ${df} dia(s)`;
-}
-function aqLoadPreset(){
-  const disc=document.getElementById('aq-disc').value;
-  aqNewCrit=(AQ_PRESETS[disc]||[]).map((t,i)=>({id:Date.now()+i,text:t}));
-  aqRenderNewCrit();
-  const pw=document.getElementById('aq-preset-wrap');
-  const all=AQ_PRESETS[disc]||[];
-  pw.innerHTML=all.map(p=>`<span class="preset-chip" onclick="aqAddPreset(${JSON.stringify(p).replace(/"/g,'&quot;')})">${p}</span>`).join('');
-}
-function aqAddPreset(t){if(!aqNewCrit.find(c=>c.text===t)){aqNewCrit.push({id:Date.now(),text:t});aqRenderNewCrit();}}
-function aqAddCritInput(){
-  aqNewCrit.push({id:Date.now(),text:''});aqRenderNewCrit();
-  setTimeout(()=>{const ins=document.querySelectorAll('.aq-nc-inp');if(ins.length)ins[ins.length-1].focus();},50);
-}
-function aqRemCrit(id){aqNewCrit=aqNewCrit.filter(c=>c.id!==id);aqRenderNewCrit();}
-function aqUpdNC(id,v){const c=aqNewCrit.find(x=>x.id===id);if(c)c.text=v;}
-function aqRenderNewCrit(){
-  document.getElementById('aq-new-crit').innerHTML=aqNewCrit.map(c=>`
-    <div class="crit-add-row">
-      <input class="aq-nc-inp" type="text" placeholder="Descreva o critério..." value="${c.text.replace(/"/g,'&quot;')}" oninput="aqUpdNC(${c.id},this.value)"/>
-      <button onclick="aqRemCrit(${c.id})">✕</button>
-    </div>`).join('');
-}
-function aqToggleAdd(){
-  const b=document.getElementById('aq-add-body'),a=document.getElementById('aq-add-arr');
-  const open=b.classList.toggle('open');a.textContent=open?'▲':'▼';
-}
-function aqAddItem(){
-  const title=document.getElementById('aq-title').value.trim();if(!title)return;
-  const criteria=aqNewCrit.filter(c=>c.text.trim()).map(c=>({id:Date.now()+Math.random(),text:c.text.trim(),done:false}));
-  aqItems.push({id:Date.now(),title,tipo:document.getElementById('aq-tipo').value,disc:document.getElementById('aq-disc').value,
-    floor:document.getElementById('aq-floor').value,apto:document.getElementById('aq-apto').value.trim(),
-    date:document.getElementById('aq-date').value||aqToday,deadline:document.getElementById('aq-deadline').value||'',
-    resp:document.getElementById('aq-resp').value.trim(),done:false,expanded:false,criteria});
-  document.getElementById('aq-title').value='';document.getElementById('aq-resp').value='';
-  document.getElementById('aq-apto').value='';
-  document.getElementById('aq-dl-hint').textContent='';
-  aqNewCrit=[];aqRenderNewCrit();aqLoadPreset();aqSave();aqRender();
-  showToast('Atividade salva ✓');
-}
-function aqToggleDone(id){const i=aqItems.find(x=>x.id===id);if(i){i.done=!i.done;aqSave();aqRender();}}
-function aqToggleExp(id){const i=aqItems.find(x=>x.id===id);if(i){i.expanded=!i.expanded;aqRender();}}
-function aqToggleCrit(iid,cid){const i=aqItems.find(x=>x.id===iid);if(!i)return;const c=i.criteria.find(x=>x.id===cid);if(c){c.done=!c.done;aqSave();aqRender();}}
-function aqRemItem(id){aqItems=aqItems.filter(i=>i.id!==id);aqSave();aqRender();}
-function tipoLabel(t){return t==='liberacao'?'Liberação':t==='finalizacao'?'Finalização':'Conferência';}
-function tipoTagCls(t){return t==='liberacao'?'tag-lib':t==='finalizacao'?'tag-fin':'tag-conf';}
-function fmtDate(d){if(!d)return'';const[y,m,dy]=d.split('-');return`${dy}/${m}/${y}`;}
-function aqGetWeek(){const d=new Date(aqNow),day=d.getDay(),diff=d.getDate()-day+(day===0?-6:1),mon=new Date(d.setDate(diff));return Array.from({length:7},(_,i)=>{const nd=new Date(mon);nd.setDate(mon.getDate()+i);return nd.toISOString().split('T')[0];});}
-
-function aqSetView(v){
-  aqView=v;
-  document.querySelectorAll('.aq-tab').forEach((t,i)=>t.classList.toggle('active',['lista','hoje','semana'][i]===v));
-  aqRender();
-}
-function aqSetFilter(f){aqFilter=f;aqRender();}
-
-function aqRender(){
-  const filters=[
-    {k:'all',l:'Todos',cls:''},
-    {k:'liberacao',l:'Liberação',cls:'fa-lib'},
-    {k:'finalizacao',l:'Finalização',cls:'fa-fin'},
-    {k:'conferencia',l:'Conferência',cls:'fa-conf'},
-    {k:'atrasado',l:'Atrasados',cls:'fa-atr'},
-    {k:'urgente',l:'Urgentes',cls:'fa-urg'},
-  ];
-  document.getElementById('aq-filters').innerHTML=filters.map(f=>`
-    <span class="aq-chip${aqFilter===f.k?' '+(f.cls||'fa-all'):''}" onclick="aqSetFilter('${f.k}')">${f.l}</span>`).join('');
-
-  const active=aqItems.filter(i=>!i.done);
-  document.getElementById('cnt-lib').textContent=active.filter(i=>i.tipo==='liberacao').length;
-  document.getElementById('cnt-fin').textContent=active.filter(i=>i.tipo==='finalizacao').length;
-  document.getElementById('cnt-conf').textContent=active.filter(i=>i.tipo==='conferencia').length;
-
-  let filtered=[...aqItems];
-  if(aqView==='hoje') filtered=filtered.filter(i=>i.date===aqToday||i.deadline===aqToday);
-  if(aqView==='semana'){const wk=aqGetWeek();filtered=filtered.filter(i=>wk.includes(i.date)||wk.includes(i.deadline));}
-  if(aqFilter==='atrasado') filtered=filtered.filter(i=>{const u=aqUrgency(i.deadline,i.done);return u==='atrasado'||u==='hoje';});
-  else if(aqFilter==='urgente') filtered=filtered.filter(i=>aqUrgency(i.deadline,i.done)==='urgente');
-  else if(aqFilter!=='all') filtered=filtered.filter(i=>i.tipo===aqFilter);
-  filtered.sort((a,b)=>{
-    if(a.done!==b.done)return a.done?1:-1;
-    const ua=aqUrgOrd(aqUrgency(a.deadline,a.done)),ub=aqUrgOrd(aqUrgency(b.deadline,b.done));
-    if(ua!==ub)return ua-ub;
-    if(a.deadline&&b.deadline&&a.deadline!==b.deadline)return a.deadline<b.deadline?-1:1;
-    return 0;
-  });
-
-  const list=document.getElementById('aq-list');
-  if(!filtered.length){list.innerHTML=`<div class="aq-empty"><div class="icon" style="font-size:28px;margin-bottom:8px">✅</div>Nenhuma atividade encontrada.</div>`;return;}
-  let html='';
-  filtered.forEach(item=>{
-    const u=aqUrgency(item.deadline,item.done);
-    const db=aqDlBadge(item.deadline,item.done);
-    const hc=item.criteria&&item.criteria.length>0;
-    const dc=hc?item.criteria.filter(c=>c.done).length:0;
-    const tc=hc?item.criteria.length:0;
-    const pct=tc?Math.round(dc/tc*100):0;
-    const pbcls=u==='atrasado'||u==='hoje'?'pb-atr':u==='urgente'?'pb-urg':'pb-ok';
-    const cardcls=u==='atrasado'||u==='hoje'?' atrasado':u==='urgente'?' urgente':'';
-    html+=`<div class="aq-card${item.done?' done-card':''}${cardcls}">
-      <div class="aq-card-hdr" onclick="aqToggleExp(${item.id})">
-        <div class="aq-chk${item.done?' ck':''}" onclick="event.stopPropagation();aqToggleDone(${item.id})"></div>
-        <div class="aq-card-info">
-          <div class="aq-card-title">${item.title}</div>
-          <div class="aq-tags">
-            <span class="aq-tag ${tipoTagCls(item.tipo)}">${tipoLabel(item.tipo)}</span>
-            <span class="aq-tag tag-disc">${item.disc}</span>
-            ${item.floor?`<span class="aq-tag tag-disc">📍 ${item.floor}</span>`:''}
-            ${item.apto?`<span class="aq-tag tag-disc">Apto ${item.apto}</span>`:''}
-            ${db?`<span class="tag-dl ${db.cls}">${db.txt}</span>`:''}
-            ${hc?`<span class="aq-tag tag-crit">${dc}/${tc} crit.</span>`:''}
-            ${item.resp?`<span class="aq-tag tag-disc">${item.resp}</span>`:''}
-          </div>
-        </div>
-        <button class="aq-card-del" onclick="event.stopPropagation();aqRemItem(${item.id})">✕</button>
-        <span class="aq-expand-arr">${item.expanded?'▲':'▼'}</span>
-      </div>`;
-    if(item.expanded){
-      html+=`<div class="aq-card-detail">
-        ${item.deadline||item.resp||item.floor||item.apto?`<div class="aq-dl-info">
-          ${item.floor||item.apto?`<div style="margin-bottom:4px">📍 ${[item.floor,item.apto?'Apto '+item.apto:''].filter(Boolean).join(' · ')}</div>`:''}
-          ${item.deadline?`Prazo: <strong>${fmtDate(item.deadline)}</strong>${db?' — '+db.txt:''}`:''} 
-          ${item.resp?`&nbsp;·&nbsp; Responsável: <strong>${item.resp}</strong>`:''}
-        </div>`:''}
-        ${hc?`<div class="aq-crit-title">Critérios para liberação</div>
-        ${item.criteria.map(c=>`
-          <div class="aq-crit-row">
-            <div class="aq-crit-chk${c.done?' cck':''}" onclick="aqToggleCrit(${item.id},${c.id})"></div>
-            <span class="aq-crit-lbl${c.done?' cdone':''}">${c.text}</span>
-          </div>`).join('')}
-        <div class="aq-prog-wrap"><div class="aq-prog ${pbcls}" style="width:${pct}%"></div></div>
-        <div class="aq-prog-lbl">${pct}% concluído</div>`:''}
-      </div>`;
-    }
-    html+=`</div>`;
-  });
-  list.innerHTML=html;
-}
-
-aqLoadPreset();
-aqRender();
-
-/* ════════════════════════════════════════
    RELATÓRIOS DE INCOERÊNCIAS (RI)
 ════════════════════════════════════════ */
 const RI_KEY       = 'ri_ocorrencias_v2';
@@ -1676,12 +1558,7 @@ try { riEmpreiteiras = JSON.parse(localStorage.getItem(RI_EMP_KEY)    || '[]'); 
 
 const RI_DISC_ALL = ['Estrutural','Hidráulica','Elétrica','Gesso','Drywall','Impermeabilização','Acabamentos','Outras'];
 
-// ── Inicializa select de pavimento ──
-(function(){
-  const fs = document.getElementById('ri-inp-floor');
-  PAVIMENTOS.forEach(p => { const o=document.createElement('option'); o.text=p; fs.appendChild(o); });
-  fs.value = '1º Pavimento';
-})();
+// Pavimentos das RIs preenchidos por refreshFloorSelects()
 
 // ── Pastas ──
 function riSaveFolders() { localStorage.setItem(RI_FOLDER_KEY, JSON.stringify(riFolders)); }
@@ -1739,6 +1616,7 @@ function riAddEmp() {
   document.getElementById('ri-new-emp-inp').value = '';
   riRenderEmpTags();
   riPopulateEmpSelect();
+updateDashboard();
   showToast('Empreiteira salva ✓');
 }
 
@@ -1848,7 +1726,7 @@ function riResetForm() {
   document.getElementById('ri-form-arr').textContent = '▼';
 }
 
-function riSave() { try { localStorage.setItem(RI_KEY, JSON.stringify(riItems)); } catch(e){} }
+function riSave() { try { localStorage.setItem(RI_KEY, JSON.stringify(riItems)); updateDashboard(); } catch(e){} }
 
 // ── Helpers ──
 function riStatusLabel(s) { return s==='pendente'?'Pendente':s==='correcao'?'Em correção':'Corrigido'; }
@@ -2071,7 +1949,7 @@ function riGeneratePDF() {
       <div class="ri-pdf-obra">
         <h2>${obra}</h2>
         <p>Relatório de Incoerências${folderFilt?' — Pasta: '+folderFilt:''}</p>
-        <p>Gerado em ${now} · ${items.length} ocorrência(s)</p>
+        <p>Gerado em ${now} · ${items.length} ocorrência(s)</p><p>Pendentes: ${items.filter(x=>x.status==='pendente').length} · Em correção: ${items.filter(x=>x.status==='correcao').length} · Corrigidas: ${items.filter(x=>x.status==='corrigido').length}</p>
       </div>
     </div>`;
 
@@ -2174,6 +2052,10 @@ async function riCopyText() {
   catch(_) { showToast('Erro ao copiar'); }
 }
 
+
+const riObraInput = document.getElementById('ri-obra-nome'); if(riObraInput) riObraInput.addEventListener('input',()=>riObraInput.dataset.userEdited='1');
+fillConfigFields();
+updateDashboard();
 </script>
 </body>
 </html>
